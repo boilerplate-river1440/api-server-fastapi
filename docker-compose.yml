@@ -1,0 +1,7 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"  # Exposes container port 8000 to your computer's localhost:8000
+    environment:
+      - PYTHONUNBUFFERED=1
