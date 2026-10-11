@@ -5,7 +5,7 @@ from ..database import get_session
 from ..models import OAuthAccount, User
 from ..oauth import oauth
 from ..schemas import Token
-from ..security import create_access_token
+from .auth import issue_session
 
 router = APIRouter(prefix="/auth/google", tags=["oauth"])
 
@@ -56,5 +56,4 @@ async def google_callback(
     if user is None:
         raise ValueError("OAuth account points to a missing user")
 
-    access_token = create_access_token(data={"sub": user.email})
-    return Token(access_token=access_token)
+    return issue_session(user, request, session)
