@@ -6,9 +6,12 @@ storage layer is SQLite plus local disk for development.
 
 ## Configuration
 
-Copy `.env.example` to `.env` and provide the required secrets. Passwords are
-sent as JSON over HTTPS and hashed with Argon2 on the server. Do not place shared
-secrets in frontend configuration: browser-delivered values are not secret.
+Copy `.env.example` to `.env` and provide the required secrets. Docker Compose
+passes this file into the container; it is not copied into the image. Azure
+Container Apps should receive the same values through app settings/secrets
+instead of a checked-in file. Passwords are sent as JSON over HTTPS and hashed
+with Argon2 on the server. Do not place shared secrets in frontend
+configuration: browser-delivered values are not secret.
 
 The application currently creates tables at startup with SQLModel. Add Alembic
 before using this schema-change strategy in production.
@@ -75,5 +78,16 @@ Every response also includes the `X-Request-ID` header. The request middleware
 logs method, path, status, and request ID without logging passwords or tokens.
 
 Rate limiting, S3 storage, Alembic migrations, and an external email provider
-remain intentionally outside this local-only implementation. They are the next
-production integration boundaries.
+remain intentionally outside this local-only implementation. SQLite,
+`uploads/`, and the generated `database.db` are container-local and ephemeral;
+use managed database/blob storage before relying on restarts or multiple Azure
+instances.
+
+## Container deployment
+
+Build and test locally with `docker compose up --build`, then publish the image
+to Docker Hub or a public GitHub Container Registry package. Azure Container
+Apps can pull that image and expose port `8000`; configure the variables from
+`.env.example` as Azure secrets/environment variables and set the health probe
+to `GET /health`. Publish a new image tag for each release and update the Azure
+container revision to that tag rather than relying on `latest`.

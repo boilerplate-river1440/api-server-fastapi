@@ -3,5 +3,7 @@ services:
     build: .
     ports:
       - "8000:8000"  # Exposes container port 8000 to your computer's localhost:8000
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
